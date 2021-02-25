@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import androidx.annotation.RequiresApi;
@@ -125,6 +126,12 @@ class FlutterWebViewClient {
     methodChannel.invokeMethod("onPageFinished", args);
   }
 
+  private void onPageError(int statusCode) {
+    Map<String, Object> args = new HashMap<>();
+    args.put("statusCode", statusCode);
+    methodChannel.invokeMethod("onPageError", args);
+  }
+
   private void onWebResourceError(
       final int errorCode, final String description, final String failingUrl) {
     final Map<String, Object> args = new HashMap<>();
@@ -177,6 +184,13 @@ class FlutterWebViewClient {
       @Override
       public void onPageFinished(WebView view, String url) {
         FlutterWebViewClient.this.onPageFinished(view, url);
+      }
+
+      @Override
+      public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
+        if (request.isForMainFrame()) {
+          FlutterWebViewClient.this.onPageError(errorResponse.getStatusCode());
+        }
       }
 
       @TargetApi(Build.VERSION_CODES.M)

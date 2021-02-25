@@ -715,6 +715,63 @@ void main() {
     });
   });
 
+  group('$PageErrorCallback', () {
+    testWidgets('return the correct status code', (WidgetTester tester) async {
+      int returnedStatusCode;
+
+      await tester.pumpWidget(WebView(
+        initialUrl: 'https://youtube.com',
+        onPageError: (int statusCode) {
+          returnedStatusCode = statusCode;
+        },
+      ));
+
+      final FakePlatformWebView platformWebView =
+          fakePlatformViewsController.lastCreatedView;
+
+      platformWebView.fakeOnPageErrorCallback(401);
+
+      expect(returnedStatusCode, 401);
+    });
+
+    testWidgets('onPageError is null', (WidgetTester tester) async {
+      await tester.pumpWidget(const WebView(
+        initialUrl: 'https://youtube.com',
+        onPageError: null,
+      ));
+
+      final FakePlatformWebView platformWebView =
+          fakePlatformViewsController.lastCreatedView;
+
+      // The platform side will always invoke a call for onPageError. This is
+      // to test that it does not crash on a null callback.
+      platformWebView.fakeOnPageErrorCallback(401);
+    });
+
+    testWidgets('onPageError changed', (WidgetTester tester) async {
+      int returnedStatusCode;
+
+      await tester.pumpWidget(WebView(
+        initialUrl: 'https://youtube.com',
+        onPageError: (int statusCode) {},
+      ));
+
+      await tester.pumpWidget(WebView(
+        initialUrl: 'https://youtube.com',
+        onPageError: (int statusCode) {
+          returnedStatusCode = statusCode;
+        },
+      ));
+
+      final FakePlatformWebView platformWebView =
+          fakePlatformViewsController.lastCreatedView;
+
+      platformWebView.fakeOnPageErrorCallback(401);
+
+      expect(returnedStatusCode, 401);
+    });
+  });
+
   group('navigationDelegate', () {
     testWidgets('hasNavigationDelegate', (WidgetTester tester) async {
       await tester.pumpWidget(const WebView(
@@ -1043,6 +1100,21 @@ class FakePlatformWebView {
     final ByteData data = codec.encodeMethodCall(MethodCall(
       'onPageFinished',
       <dynamic, dynamic>{'url': currentUrl},
+    ));
+
+    ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      channel.name,
+      data,
+      (ByteData data) {},
+    );
+  }
+
+  void fakeOnPageErrorCallback(int statusCode) {
+    final StandardMethodCodec codec = const StandardMethodCodec();
+
+    final ByteData data = codec.encodeMethodCall(MethodCall(
+      'onPageError',
+      <dynamic, dynamic>{'statusCode': statusCode},
     ));
 
     ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
