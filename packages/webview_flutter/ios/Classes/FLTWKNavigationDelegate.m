@@ -66,6 +66,24 @@
   [_methodChannel invokeMethod:@"onPageFinished" arguments:@{@"url" : webView.URL.absoluteString}];
 }
 
+- (void)webView:(WKWebView *)webView decidePolicyForNavigationResponse:(WKNavigationResponse *)navigationResponse decisionHandler:(void (^)(WKNavigationResponsePolicy))decisionHandler {
+    NSHTTPURLResponse *response = (NSHTTPURLResponse *)navigationResponse.response;
+
+    if ([navigationResponse isForMainFrame]) {
+        NSInteger statusCode = [response statusCode];
+
+        if (statusCode < 400) {
+            decisionHandler(WKNavigationResponsePolicyAllow);
+        } else {
+            decisionHandler(WKNavigationResponsePolicyAllow);
+
+            [_methodChannel invokeMethod:@"onPageError" arguments:@{@"statusCode" : @(statusCode)}];
+        }
+    } else {
+        decisionHandler(WKNavigationResponsePolicyAllow);
+    }
+}
+
 + (id)errorCodeToString:(NSUInteger)code {
   switch (code) {
     case WKErrorUnknown:
