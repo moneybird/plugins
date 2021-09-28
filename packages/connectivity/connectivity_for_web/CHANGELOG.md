@@ -1,3 +1,12 @@
+## 0.4.0+1
+
+* Add `implements` to pubspec.
+
+## 0.4.0
+
+* Migrate to null-safety
+* Run tests using flutter driver
+
 ## 0.3.1+4
 
 * Remove unused `test` dependency.
