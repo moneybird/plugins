@@ -35,6 +35,9 @@ typedef void PageFinishedCallback(String url);
 /// Signature for when a [WebView] is loading a page.
 typedef void PageLoadingCallback(int progress);
 
+/// Signature for when a [WebView] has finished loading a page with a HTTP error.
+typedef void PageErrorCallback(int statusCode);
+
 /// Signature for when a [WebView] has failed to load a resource.
 typedef void WebResourceErrorCallback(WebResourceError error);
 
@@ -68,6 +71,7 @@ class WebView extends StatefulWidget {
     this.onPageStarted,
     this.onPageFinished,
     this.onProgress,
+    this.onPageError,
     this.onWebResourceError,
     this.debuggingEnabled = false,
     this.gestureNavigationEnabled = false,
@@ -195,6 +199,9 @@ class WebView extends StatefulWidget {
 
   /// Invoked when a page is loading.
   final PageLoadingCallback? onProgress;
+
+  /// Invoked when a page load resulted in a HTTP error
+  final PageErrorCallback? onPageError;
 
   /// Invoked when a web resource has failed to load.
   ///
@@ -336,6 +343,13 @@ class _PlatformCallbacksHandler implements WebViewPlatformCallbacksHandler {
   void onProgress(int progress) {
     if (_webView.onProgress != null) {
       _webView.onProgress!(progress);
+    }
+  }
+
+  @override
+  void onPageError(int statusCode) {
+    if (_webView.onPageError != null) {
+      _webView.onPageError!(statusCode);
     }
   }
 

@@ -27,6 +27,9 @@ abstract class WebViewPlatformCallbacksHandler {
   /// /// Only works when [WebSettings.hasProgressTracking] is set to `true`.
   void onProgress(int progress);
 
+  /// Invoked by [WebViewPlatformController] when a page has HTTP errors.
+  void onPageError(int statusCode);
+
   /// Report web resource loading error to the host application.
   void onWebResourceError(WebResourceError error);
 }
