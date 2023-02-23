@@ -95,6 +95,20 @@ void main() {
 
   test(
       // ignore: lines_longer_than_80_chars
+      'Default implementation of setOnPageError should throw unimplemented error',
+      () {
+    final PlatformNavigationDelegate callbackDelegate =
+        ExtendsPlatformNavigationDelegate(
+            const PlatformNavigationDelegateCreationParams());
+
+    expect(
+      () => callbackDelegate.setOnPageError((int statusCode) {}),
+      throwsUnimplementedError,
+    );
+  });
+
+  test(
+      // ignore: lines_longer_than_80_chars
       'Default implementation of setOnProgress should throw unimplemented error',
       () {
     final PlatformNavigationDelegate callbackDelegate =
